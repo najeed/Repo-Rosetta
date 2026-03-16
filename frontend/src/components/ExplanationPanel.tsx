@@ -20,24 +20,47 @@ interface ExplanationPanelProps {
   setPersona: (persona: string) => void;
   verbosity: string;
   setVerbosity: (verbosity: string) => void;
+  selectedNodeId?: string | null;
+  isLoading?: boolean;
+  isDebugEnabled?: boolean;
+  onTrace?: (nodeId: string) => void;
 }
 
 export const ExplanationPanel: React.FC<ExplanationPanelProps> = ({
-  entityName = "auth_service.py",
-  type = "Service Layer",
-  lineCount = 312,
-  purpose = "Handles user authentication, password validation, and JWT token generation.",
-  keyFunctions = [
-    { name: "validate_user()", line: 142 },
-    { name: "generate_token()", line: 198 },
-    { name: "hash_password()", line: 67 }
-  ],
-  dependencies = ["database.py", "jwt_utils.py", "bcrypt (external)"],
+  entityName,
+  type,
+  lineCount,
+  purpose,
+  keyFunctions,
+  dependencies,
   persona,
   setPersona,
   verbosity,
-  setVerbosity
+  setVerbosity,
+  selectedNodeId,
+  isLoading,
+  isDebugEnabled,
+  onTrace
 }) => {
+  const [annotations, setAnnotations] = React.useState<any[]>([]);
+
+  React.useEffect(() => {
+    if (selectedNodeId) {
+      const fetchAnnotations = async () => {
+        try {
+          const res = await fetch(`/api/annotations/${encodeURIComponent(selectedNodeId)}`);
+          if (res.ok) {
+            const data = await res.json();
+            setAnnotations(data);
+          }
+        } catch (err) {
+          console.error("Failed to fetch annotations:", err);
+        }
+      };
+      fetchAnnotations();
+    }
+  }, [selectedNodeId]);
+
   return (
     <div className="w-[450px] h-full bg-slate-900/80 backdrop-blur-xl border-l border-slate-800 text-slate-200 flex flex-col shadow-2xl overflow-hidden">
       {/* Header */}
@@ -66,7 +89,6 @@ export const ExplanationPanel: React.FC<ExplanationPanelProps> = ({
             onChange={(e) => setPersona(e.target.value)}
             className="w-full bg-slate-800 border border-slate-700 rounded-md px-3 py-1.5 text-sm focus:ring-2 focus:ring-blue-500/40 outline-none transition-all cursor-pointer"
           >
-            <option value="beginner">Beginner</option>
             <option value="intermediate">Intermediate</option>
             <option value="senior-engineer">Senior Engineer</option>
             <option value="architect">System Architect</option>
@@ -99,9 +121,17 @@ export const ExplanationPanel: React.FC<ExplanationPanelProps> = ({
             <Info size={14} className="text-slate-400" />
             Purpose
           </h3>
-          <p className="text-slate-300 leading-relaxed text-[15px]">
-            {purpose}
-          </p>
+          {isLoading ? (
+            <div className="space-y-2 animate-pulse">
+              <div className="h-4 bg-slate-800 rounded w-full" />
+              <div className="h-4 bg-slate-800 rounded w-5/6" />
+              <div className="h-4 bg-slate-800 rounded w-4/6" />
+            </div>
+          ) : (
+            <p className="text-slate-300 leading-relaxed text-[15px]">
+              {purpose}
+            </p>
+          )}
         </section>
 
         {/* Key Functions */}
@@ -110,43 +140,44 @@ export const ExplanationPanel: React.FC<ExplanationPanelProps> = ({
             <Activity size={14} className="text-slate-400" />
             Key Functions
           </h3>
-          <div className="space-y-2">
-            {keyFunctions.map((fn, idx) => (
-              <button key={idx} className="w-full flex justify-between items-center group p-2.5 rounded-lg bg-slate-800/40 hover:bg-slate-800 border border-slate-700/50 hover:border-slate-600 transition-all">
-                <span className="text-sm font-mono text-blue-300 group-hover:text-blue-200">{fn.name}</span>
-                <span className="text-[10px] text-slate-500 font-mono">L{fn.line}</span>
-              </button>
-            ))}
-          </div>
+          {isLoading ? (
+            <div className="space-y-2 animate-pulse">
+              {[1, 2, 3].map((v) => (
+                <div key={v} className="h-10 bg-slate-800 rounded-lg w-full" />
+              ))}
+            </div>
+          ) : (
+            <div className="space-y-2">
+              {keyFunctions?.map((fn, idx) => (
+                <button key={idx} className="w-full flex justify-between items-center group p-2.5 rounded-lg bg-slate-800/40 hover:bg-slate-800 border border-slate-700/50 hover:border-slate-600 transition-all">
+                  <span className="text-sm font-mono text-blue-300 group-hover:text-blue-200">{fn.name}</span>
+                  <span className="text-[10px] text-slate-500 font-mono">L{fn.line}</span>
+                </button>
+              ))}
+            </div>
+          )}
         </section>
 
-        {/* Refactoring Suggestions (V5) */}
-        <section className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-200">
-          <h3 className="text-xs font-bold uppercase tracking-widest mb-2 flex items-center gap-2">
-            <Activity size={14} className="text-amber-500" />
-            AI Refactoring Advisor
-          </h3>
-          <ul className="text-xs space-y-1.5 list-disc list-inside opacity-90">
-             <li>🚀 Large Module: Consider splitting into sub-modules.</li>
-             <li>📝 Documentation Gap: Add docstrings to public API.</li>
-          </ul>
-        </section>
-
-        {/* External Context (V5) */}
+        {/* Saved Annotations (Internal Context) */}
         <section>
           <h3 className="text-xs font-bold text-slate-500 uppercase tracking-[0.2em] mb-3 flex items-center gap-2">
             <MessageSquare size={14} className="text-slate-400" />
-            Internal Context
+            Saved Annotations
           </h3>
           <div className="space-y-2">
-            <div className="p-2.5 rounded-lg bg-slate-800/20 border border-slate-800 flex flex-col gap-1">
-              <span className="text-[10px] font-bold text-blue-400 uppercase">Slack #auth-channel</span>
-              <p className="text-xs text-slate-400 italic">&quot;Discussion on moving to OAuth2 logic (March 2026)&quot;</p>
-            </div>
-            <div className="p-2.5 rounded-lg bg-slate-800/20 border border-slate-800 flex flex-col gap-1">
-              <span className="text-[10px] font-bold text-emerald-400 uppercase">Notion wiki</span>
-              <p className="text-xs text-slate-400 italic">&quot;ADR: Secure Data Deletion patterns&quot;</p>
-            </div>
+            {annotations.length > 0 ? annotations.map((ann, idx) => (
+              <div key={idx} className="p-2.5 rounded-lg bg-slate-800/20 border border-slate-800 flex flex-col gap-1 hover:border-slate-600 transition-colors">
+                <div className="flex justify-between items-center text-[10px] font-bold">
+                  <span className="text-blue-400 uppercase tracking-tighter">{ann.author}</span>
+                  <span className="text-slate-600 font-mono">{new Date(ann.timestamp).toLocaleDateString()}</span>
+                </div>
+                <p className="text-xs text-slate-300 italic">&quot;{ann.text}&quot;</p>
+              </div>
+            )) : (
+              <div className="p-3 rounded-lg border border-dashed border-slate-800 text-center">
+                <p className="text-[10px] text-slate-500 uppercase tracking-widest">No annotations found</p>
+              </div>
+            )}
           </div>
         </section>
 
@@ -156,13 +187,21 @@ export const ExplanationPanel: React.FC<ExplanationPanelProps> = ({
             <Layers size={14} className="text-slate-400" />
             Dependencies
           </h3>
-          <ul className="flex flex-wrap gap-2">
-            {dependencies.map((dep, idx) => (
-              <li key={idx} className="px-2.5 py-1 rounded-full bg-slate-800 text-[11px] font-medium text-slate-400 border border-slate-700">
-                {dep}
-              </li>
-            ))}
-          </ul>
+          {isLoading ? (
+            <div className="flex flex-wrap gap-2 animate-pulse">
+              {[1, 2, 3, 4].map((v) => (
+                <div key={v} className="h-6 bg-slate-800 rounded-full w-16" />
+              ))}
+            </div>
+          ) : (
+            <ul className="flex flex-wrap gap-2">
+              {dependencies?.map((dep, idx) => (
+                <li key={idx} className="px-2.5 py-1 rounded-full bg-slate-800 text-[11px] font-medium text-slate-400 border border-slate-700">
+                  {dep}
+                </li>
+              ))}
+            </ul>
+          )}
         </section>
       </div>
 
@@ -175,7 +214,10 @@ export const ExplanationPanel: React.FC<ExplanationPanelProps> = ({
           <ExternalLink size={16} />
           GitHub
         </button>
-        <button className="flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg bg-blue-600 hover:bg-blue-500 text-sm font-semibold text-white transition-all shadow-lg shadow-blue-900/20">
+        <button 
+          onClick={() => selectedNodeId && onTrace && onTrace(selectedNodeId)}
+          className="flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg bg-blue-600 hover:bg-blue-500 text-sm font-semibold text-white transition-all shadow-lg shadow-blue-900/20"
+        >
           <Activity size={16} />
           Trace
         </button>

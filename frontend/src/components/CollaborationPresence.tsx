@@ -4,10 +4,11 @@ import React from 'react';
 import { clsx } from 'clsx';
 
 const MOCK_USERS = [
-  { id: 'u1', name: 'Jane Architect', color: 'bg-emerald-500', initial: 'J' },
-  { id: 'u2', name: 'Bob Dev', color: 'bg-amber-500', initial: 'B' },
-  { id: 'u3', name: 'Alice Sec', color: 'bg-violet-500', initial: 'A' },
+  { id: 'u1', name: 'Lead Architect', color: 'bg-emerald-500', initial: 'LA' },
+  { id: 'u2', name: 'Security Lead', color: 'bg-amber-600', initial: 'SL' },
+  { id: 'u3', name: 'Core Engineer', color: 'bg-violet-600', initial: 'CE' },
 ];
+
 
 export const CollaborationPresence = () => {
   return (

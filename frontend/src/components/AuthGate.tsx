@@ -7,15 +7,18 @@ interface AuthGateProps {
   children: React.ReactNode;
   repoUrl: string;
   isPrivate: boolean;
+  onAuthSuccess?: (token: string) => void;
+  authToken?: string | null;
 }
 
-export const AuthGate: React.FC<AuthGateProps> = ({ children, repoUrl, isPrivate }) => {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [loading, setLoading] = useState(isPrivate);
+export const AuthGate: React.FC<AuthGateProps> = ({ children, repoUrl, isPrivate, onAuthSuccess, authToken }) => {
+  const [isAuthenticated, setIsAuthenticated] = useState(!!authToken);
+  const [loading, setLoading] = useState(isPrivate && !authToken);
 
   useEffect(() => {
-    if (!isPrivate) {
-      setIsAuthenticated(true);
+    if (!isPrivate || authToken) {
+      if (!isAuthenticated && (authToken || !isPrivate)) setIsAuthenticated(true);
+      setLoading(false);
       return;
     }
 
@@ -30,7 +33,7 @@ export const AuthGate: React.FC<AuthGateProps> = ({ children, repoUrl, isPrivate
     };
 
     checkAuth();
-  }, [isPrivate]);
+  }, [isPrivate, authToken]);
 
   if (loading) {
     return (
@@ -55,11 +58,23 @@ export const AuthGate: React.FC<AuthGateProps> = ({ children, repoUrl, isPrivate
           </p>
           
           <button 
-            onClick={() => setIsAuthenticated(true)}
-            className="w-full flex items-center justify-center gap-3 py-3 px-6 rounded-xl bg-white hover:bg-slate-200 text-slate-950 font-bold transition-all transform hover:scale-[1.02] active:scale-[0.98]"
+            onClick={() => {
+              setLoading(true);
+              setTimeout(() => {
+                setIsAuthenticated(true);
+                setLoading(false);
+                if (onAuthSuccess) onAuthSuccess("mock-codebase-token");
+              }, 1500);
+            }}
+            disabled={loading}
+            className="w-full flex items-center justify-center gap-3 py-3 px-6 rounded-xl bg-white hover:bg-slate-200 text-slate-950 font-bold transition-all transform hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50"
           >
-            <Github size={20} />
-            Authorize with GitHub
+            {loading ? (
+              <div className="w-5 h-5 border-2 border-slate-900/20 border-t-slate-900 rounded-full animate-spin" />
+            ) : (
+              <Github size={20} />
+            )}
+            {loading ? "Authorizing..." : "Authorize with GitHub"}
           </button>
           
           <div className="mt-8 pt-6 border-t border-slate-800 grid grid-cols-2 gap-4">

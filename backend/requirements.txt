@@ -9,10 +9,10 @@ tree-sitter-rust
 tree-sitter-cpp
 pydantic
 anthropic
-google-generativeai
+google-genai
 httpx
 rustworkx==0.16.0
 pytest==8.4.0
 httpx==0.28.1
 networkx
-python-dotenv
+openai

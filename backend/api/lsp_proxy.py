@@ -4,7 +4,7 @@ from backend.graph.manager import GraphManager
 
 router = APIRouter()
 # Use a shared instance or re-initialize (for this prototype, we'll re-initialize or use a singleton pattern if we had one)
-graph_manager = GraphManager() 
+from backend.instances import graph_manager
 
 class LSPRequest(BaseModel):
     method: str

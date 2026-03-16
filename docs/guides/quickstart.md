@@ -11,13 +11,20 @@ Welcome! This guide will get you from zero to architecture map in under 5 minute
 The fastest way to experience Repo Rosetta is via Docker Compose.
 
 ```bash
-git clone https://github.com/najeed/repo-rosetta.git
-cd repo-rosetta
 docker-compose up -d
 ```
 Access the dashboard at [http://localhost:3000](http://localhost:3000).
 
-## 3. Local CLI Scan
+## 3. Local Setup (Non-Docker)
+If you prefer running natively on Windows:
+
+1. **Setup .env**: Copy `.env.example` to `.env` and add your keys.
+2. **Launch**:
+   - **Windows**: Run `run_local.bat`
+   - **macOS/Linux**: Run `chmod +x run_local.sh && ./run_local.sh`
+Access the dashboard at [http://localhost:3001](http://localhost:3001).
+
+## 4. Local CLI Scan
 If you just want a quick `CODEBASE.md` file for your project:
 
 ```bash
@@ -32,7 +39,7 @@ python cli/rosetta.py ./my-project --output ./docs/rosetta
 1. Open the Web Dashboard.
 2. Enter a GitHub URL (e.g., `fastapi/fastapi`).
 3. Click **Analyze**.
-4. Explore the **Architecture Map** and click on any node to see a **Senior Engineer** explanation in the sidebar.
+4. Explore the **Architecture Map** and click on any node to see a **Senior Engineer** (code quality) or **Architect** (system design) explanation in the sidebar.
 5. (Optional) Toggle **Regression Mode** in the top-right to see architectural diffs.
 
 ## 5. Next Steps

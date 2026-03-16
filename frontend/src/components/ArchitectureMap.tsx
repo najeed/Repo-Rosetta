@@ -15,53 +15,23 @@ import {
   Node,
   BackgroundVariant,
   Panel,
+  useReactFlow,
+  ReactFlowProvider,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import { GitCompare } from 'lucide-react';
 
-const initialNodes: Node[] = [
-  {
-    id: 'repo-root',
-    type: 'input',
-    data: { label: 'repo-rosetta [root]' },
-    position: { x: 250, y: 0 },
-    className: 'bg-slate-900 border-2 border-blue-500 text-white rounded-lg p-4 shadow-[0_0_20px_rgba(59,130,246,0.2)]',
-  },
-  {
-    id: 'backend',
-    data: { label: 'Backend (FastAPI)' },
-    position: { x: 100, y: 150 },
-    className: 'bg-slate-800 border border-violet-500 text-white rounded-lg p-3',
-  },
-  {
-    id: 'frontend',
-    data: { label: 'Frontend (Next.js)' },
-    position: { x: 400, y: 150 },
-    className: 'bg-slate-800 border border-emerald-500 text-white rounded-lg p-3',
-  },
-  {
-    id: 'parser',
-    data: { label: 'Parser Engine' },
-    position: { x: 0, y: 250 },
-    className: 'bg-slate-800 border border-slate-700 text-slate-300 rounded-lg p-2 text-sm',
-  },
-  {
-    id: 'graph',
-    data: { label: 'Graph Manager' },
-    position: { x: 200, y: 250 },
-    className: 'bg-slate-800 border border-slate-700 text-slate-300 rounded-lg p-2 text-sm',
-  },
-];
+const initialNodes: Node[] = [];
+const initialEdges: Edge[] = [];
 
-const initialEdges: Edge[] = [
-  { id: 'e-root-backend', source: 'repo-root', target: 'backend', animated: true, style: { stroke: '#8B5CF6' } },
-  { id: 'e-root-frontend', source: 'repo-root', target: 'frontend', animated: true, style: { stroke: '#10B981' } },
-  { id: 'e-backend-parser', source: 'backend', target: 'parser', label: 'uses', style: { stroke: '#64748B' } },
-  { id: 'e-backend-graph', source: 'backend', target: 'graph', label: 'manages', style: { stroke: '#64748B' } },
-];
+interface ArchitectureMapProps {
+  onNodeClick?: (nodeId: string, data: any) => void;
+  searchQuery?: string;
+}
 
-export const ArchitectureMap = () => {
+const ArchitectureMapContent: React.FC<ArchitectureMapProps> = ({ onNodeClick, searchQuery = "" }) => {
   const [nodes, setNodes, onNodesChange] = useNodesState<Node>([]);
+  const { fitView } = useReactFlow();
   const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>([]);
   const [isRegressionMode, setIsRegressionMode] = React.useState(false);
 
@@ -73,7 +43,7 @@ export const ArchitectureMap = () => {
         
         const flowNodes: Node[] = data.nodes.map((n: any, idx: number) => ({
           id: n.id,
-          data: { label: `${n.name} [${n.type}]` },
+          data: { ...n, label: `${n.name} [${n.type}]` },
           position: { x: (idx % 3) * 250, y: Math.floor(idx / 3) * 150 },
           className: n.type === 'module' 
             ? 'bg-slate-900 border-2 border-blue-500 text-white rounded-lg p-4 shadow-lg'
@@ -82,8 +52,8 @@ export const ArchitectureMap = () => {
             : 'bg-slate-800 border border-slate-700 text-slate-300 rounded-lg p-2 text-sm'
         }));
 
-        const flowEdges: Edge[] = data.edges.map((e: any) => ({
-          id: `e-${e.source}-${e.target}`,
+        const flowEdges: Edge[] = data.edges.map((e: any, idx: number) => ({
+          id: e.id || `e-${e.source}-${e.target}-${idx}`,
           source: e.source,
           target: e.target,
           label: e.type,
@@ -99,6 +69,41 @@ export const ArchitectureMap = () => {
     };
     fetchGraph();
   }, []);
+
+  // Search Highlighting & Auto-scroll Logic
+  React.useEffect(() => {
+    if (!searchQuery) {
+      setNodes((nds) => nds.map((n) => ({ ...n, style: { ...n.style, opacity: 1, boxShadow: 'none' } })));
+      return;
+    }
+
+    const term = searchQuery.toLowerCase();
+    let matchedId: string | null = null;
+
+    setNodes((nds) => {
+      const updated = nds.map((n) => {
+        const label = (n.data?.label as string || "").toLowerCase();
+        const id = n.id.toLowerCase();
+        const isMatch = id.includes(term) || label.includes(term);
+        if (isMatch && !matchedId) matchedId = n.id;
+        
+        return {
+          ...n,
+          style: {
+            ...n.style,
+            opacity: isMatch ? 1 : 0.2,
+            boxShadow: isMatch ? '0 0 25px rgba(59, 130, 246, 0.6)' : 'none',
+          }
+        };
+      });
+
+      if (matchedId) {
+        fitView({ nodes: [{ id: matchedId }], duration: 800, padding: 0.5 });
+      }
+
+      return updated;
+    });
+  }, [searchQuery, setNodes, fitView]);
 
   const saveAnnotation = async (nodeId: string, text: string) => {
     try {
@@ -126,6 +131,9 @@ export const ArchitectureMap = () => {
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
         onConnect={onConnect}
+        onNodeClick={(event, node) => {
+          if (onNodeClick) onNodeClick(node.id, node.data.metadata || node.data);
+        }}
         onNodeContextMenu={(event, node) => {
           event.preventDefault();
           const note = prompt(`Add Team Note for ${node.data.label}:`);
@@ -180,3 +188,9 @@ export const ArchitectureMap = () => {
     </div>
   );
 };
+
+export const ArchitectureMap: React.FC<ArchitectureMapProps> = (props) => (
+  <ReactFlowProvider>
+    <ArchitectureMapContent {...props} />
+  </ReactFlowProvider>
+);

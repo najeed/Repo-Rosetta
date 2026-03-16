@@ -5,11 +5,10 @@ Master the intelligence and navigation features of Repo Rosetta to get the most 
 ## 🎭 Using Personas
 Repo Rosetta's AI can shift its perspective to match your needs. Use the **Persona Selector** in the Explanation Panel:
 
-- **Beginner**: Best for high-level introductions. Uses simple language and analogies.
-- **Senior Engineer**: The default mode. Provides technical depth, implementation details, and pattern identification.
-- **Architect**: Focuses on the "Big Picture": dependencies, modularity, and large-scale data flow.
-- **Product Manager**: Translates code into capabilities and business impact summaries.
-
+- **PM**: High-fidelity summaries focused on **impact and business logic**. Extremely concise.
+- **Senior Engineer**: Technical depth focused on **code quality, maintainability, and performance**.
+- **Architect**: Strategic perspective: **SOLID patterns, modularity, and system boundaries**.
+- **Beginner**: High-level introductions using simple language and analogies.
 ## 📏 Adjusting Verbosity
 Control the detail of the explanations using the **Verbosity Slider**:
 
@@ -18,13 +17,16 @@ Control the detail of the explanations using the **Verbosity Slider**:
 3. **Standard**: Detailed overview of internal logic and direct dependencies.
 4. **Deep**: Exhaustive analysis, including edge cases and line-by-line mechanics.
 
-## 🗺 Interactive Maps
-The **Architecture Map** is the heart of Repo Rosetta:
-
-- **Navigation**: Click and drag to pan, use the scroll wheel to zoom.
-- **Selection**: Click on a node to focus the **Explanation Panel** on that specific entity.
+## 🗺 Interactive Maps (Web UI)
+The **Interactive Architecture Maps**: Real-time visualization powered by **React Flow** and **D3.js** with persistent team annotations.
+- **Map-Reduce Chunking**: Effortlessly analyze multi-thousand line files. Rosetta semantically splits massive modules and recursively synthesizes them into cohesive summaries.
+- **Execution Flow Tracing**: Click "Trace" on any node to perform a BFS-powered logic audit, revealing hidden connections across your repository.
+- **Internal Knowledge Graph**: All features are backed by a unified semantic index, ensuring consistent reasoning across visual and chat interfaces.
 - **Hierarchy**: Use the **Layout Toggle** to switch between "Logical/Folder" views and "Dependency" views.
 - **MiniMap**: Use the bottom-right MiniMap to navigate large-scale codebases without losing context.
+
+## 🐚 CLI & Markdown Reports
+For portability, the CLI generates **Mermaid** diagrams (`graph TD`) which can be natively rendered by GitHub, VS Code, and Obsidian. This ensures your documentation remains useful even when viewed in a static markdown environment.
 
 ## 💬 Interactive Chat
 Click the floating **Message Square** icon in the bottom-right to open the Rosetta Chat:

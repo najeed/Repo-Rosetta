@@ -2,6 +2,10 @@ from fastapi import FastAPI
 from backend.api import router as api_router
 from backend.api import chat as chat_router
 from backend.api import lsp_proxy as lsp_router
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
 
 app = FastAPI(title="Repo Rosetta API", version="1.0.0")
 

@@ -10,9 +10,17 @@ interface Message {
   content: string;
 }
 
-export const ChatOverlay = ({ onClose }: { onClose: () => void }) => {
+export const ChatOverlay = ({ 
+  onClose, 
+  repoUrl, 
+  persona 
+}: { 
+  onClose: () => void;
+  repoUrl: string;
+  persona: string;
+}) => {
   const [messages, setMessages] = useState<Message[]>([
-    { id: '1', role: 'assistant', content: 'Hello! I am your Rosetta AI. Ask me anything about the codebase.' }
+    { id: '1', role: 'assistant', content: `Hello! I am your Rosetta AI. I've indexed the Knowledge Graph for ${repoUrl}. Ask me anything!` }
   ]);
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
@@ -25,16 +33,34 @@ export const ChatOverlay = ({ onClose }: { onClose: () => void }) => {
     setInput('');
     setIsTyping(true);
 
-    // Mock API call
-    setTimeout(() => {
+    try {
+      const response = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          query: input,
+          repo_url: repoUrl,
+          persona: persona
+        })
+      });
+      
+      const data = await response.json();
       const assistantMsg: Message = { 
         id: (Date.now() + 1).toString(), 
         role: 'assistant', 
-        content: `I analyzed the repository for your query: "${input}". Based on the graph, this functionality is primarily implemented in the core modules.` 
+        content: data.answer || "I'm sorry, I couldn't process that query." 
       };
       setMessages(prev => [...prev, assistantMsg]);
+    } catch (err) {
+      const errorMsg: Message = { 
+        id: (Date.now() + 1).toString(), 
+        role: 'assistant', 
+        content: "Error: I'm having trouble connecting to the reasoning engine. Please ensure the backend is running." 
+      };
+      setMessages(prev => [...prev, errorMsg]);
+    } finally {
       setIsTyping(false);
-    }, 1500);
+    }
   };
 
   return (

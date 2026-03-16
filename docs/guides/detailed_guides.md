@@ -54,8 +54,9 @@ For a 100% private and free experience, configure a local model:
    ```bash
    ollama pull deepseek-coder:6.7b
    ```
-3. **Configure Docker**: Our `docker-compose.yml` includes an `ollama` service. To use your host's instance instead, update `NEXT_PUBLIC_OLLAMA_URL` to point to your local IP.
-4. **Select Provider**: In the Explanation Panel, select **Ollama** as your preferred reasoning engine.
+3. **Hardware Requirements**: To ensure faster execution with local models, it is recommended to have **8GB+ of available RAM** (for 7B models) and a multi-core CPU. For near-instant processing, a dedicated GPU with sufficient VRAM is highly recommended.
+4. **Configure Docker**: Our `docker-compose.yml` includes an `ollama` service. To use your host's instance instead, update `NEXT_PUBLIC_OLLAMA_URL` to point to your local IP.
+5. **Select Provider**: In the Explanation Panel, select **Ollama** as your preferred reasoning engine.
 
 ## 🧬 Architectural Regression Engine
 Repo Rosetta's regression engine leverages `rustworkx` to perform high-speed graph diffing between repository states.
@@ -70,14 +71,17 @@ The backend provides a standardized LSP (Language Server Protocol) proxy at `/ap
 - **Security**: Requires a valid OAuth token to fetch metadata for private repositories.
 
 ## 🐳 Self-Hosted Deployment
-To run Repo Rosetta entirely within your own infrastructure:
+You can run Repo Rosetta in two ways:
 
+### 1. Docker Compose (Cross-Platform)
 ```bash
-# Set your environment variables
-export GITHUB_CLIENT_ID=your_id
-export GITHUB_CLIENT_SECRET=your_secret
-
-# Start the stack
 docker-compose up -d --build
 ```
-This deploys the FastAPI backend, Next.js frontend, and a dedicated Ollama instance for a fully self-contained ecosystem.
+This deploys the FastAPI backend, Next.js frontend, and a dedicated Ollama instance.
+
+### 2. Native Local Launch (No Docker)
+1. **Requirements**: Python 3.9+, Node.js 18+.
+2. **Setup**: Copy `.env.example` to `.env` and add your keys.
+3. **Run**: 
+   - **Windows**: Double-click `run_local.bat`.
+   - **POSIX**: Run `chmod +x run_local.sh && ./run_local.sh`.

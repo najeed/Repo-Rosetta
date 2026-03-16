@@ -11,6 +11,7 @@
 - **Enterprise Intelligence**:
     - **Internal Knowledge Integration**: Live local markdown search engine providing authentic internal documentation context.
     - **AI Refactoring Advisor**: Automated identification of architectural smells using semantic graph insights.
+- **Resilience & Fallbacks**: Intelligent session-wide failure caching and intra-family model tiering (Pro -> Flash).
 
 ### Visualization & UX
 - **Interactive Architecture Map**: React Flow diagrams with smooth panning/zooming.
