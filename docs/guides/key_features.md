@@ -7,7 +7,7 @@ Repo Rosetta's AI can shift its perspective to match your needs. Use the **Perso
 
 - **Beginner**: Best for high-level introductions. Uses simple language and analogies.
 - **Senior Engineer**: The default mode. Provides technical depth, implementation details, and pattern identification.
-- **Architect**: Focuses on the "Big Picture"—dependencies, modularity, and large-scale data flow.
+- **Architect**: Focuses on the "Big Picture": dependencies, modularity, and large-scale data flow.
 - **Product Manager**: Translates code into capabilities and business impact summaries.
 
 ## 📏 Adjusting Verbosity
@@ -50,4 +50,4 @@ Generate architectural documentation directly from your terminal:
 # Generate a standard CODEBASE.md for the current directory
 python cli/rosetta.py . --persona architect --verbosity standard
 ```
-The resulting file is saved in `[output]/CODEBASE.md`.
+The resulting file is saved in `/docs/rosetta/codebase_architect_standard.md`.

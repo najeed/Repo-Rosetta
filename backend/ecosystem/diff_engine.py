@@ -6,15 +6,23 @@ class GraphDiffEngine:
     def compare_graphs(baseline: rx.PyDiGraph, current: rx.PyDiGraph) -> Dict[str, List[str]]:
         """
         Compares two graphs and returns sets of added/removed/modified nodes.
-        Note: Baseline and Current would be re-constructed from branch snapshots.
+        Labels are assumed to be the 'path:name' unique strings.
         """
-        # Mocking the diff logic for now
-        # In a real implementation, we would compare node labels (path:name)
+        baseline_nodes = {baseline[i] for i in baseline.node_indices()}
+        current_nodes = {current[i] for i in current.node_indices()}
+        
+        added = list(current_nodes - baseline_nodes)
+        removed = list(baseline_nodes - current_nodes)
+        
+        # Modified is complex (requires comparing node weights/data)
+        # For now, we identity nodes that exist in both
+        common = current_nodes & baseline_nodes
+        modified = [] # Placeholder for deep property comparison
         
         return {
-            "added": ["backend/api/lsp_proxy.py:lsp_proxy", "backend/ecosystem/diff_engine.py:GraphDiffEngine"],
-            "removed": [],
-            "modified": ["frontend/src/components/ArchitectureMap.tsx"]
+            "added": sorted(added),
+            "removed": sorted(removed),
+            "modified": modified
         }
 
     @staticmethod

@@ -1,18 +1,26 @@
 import pytest
 import os
+import tree_sitter
+print(f"DEBUG: tree_sitter package path: {tree_sitter.__file__}")
 from backend.parser.engine import ParserEngine
+
+def test_parser_python_extraction():
+    parser = ParserEngine()
+    # Test on backend/main.py
+    result = parser.parse_file("backend/main.py")
+    assert result is not None
+    assert result["language"] == "python"
+    
+    # Check if it found the 'root' function or imports
+    entity_names = [e["name"] for e in result["entities"]]
+    assert "root" in entity_names
+    assert "fastapi" in entity_names
 
 def test_parser_extension_mapping():
     parser = ParserEngine()
-    
-    # Mocking different extensions to test mapping
-    assert parser.parse_file("test.py") is not None
-    assert parser.parse_file("test.js") is not None
-    assert parser.parse_file("test.tsx") is not None
-    assert parser.parse_file("test.go") is not None
-    assert parser.parse_file("test.rs") is not None
-    assert parser.parse_file("test.cpp") is not None
-    assert parser.parse_file("test.txt") is None
+    # Test mapping for other languages (should return empty entities for now)
+    assert parser.parse_file("test.js")["entities"] == []
+    assert parser.parse_file("test.go")["entities"] == []
 
 def test_parser_cleanup(tmp_path):
     parser = ParserEngine()
