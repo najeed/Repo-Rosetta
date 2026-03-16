@@ -1,0 +1,10 @@
+fastapi
+uvicorn
+tree-sitter
+tree-sitter-languages
+pydantic
+anthropic
+google-generativeai
+httpx
+networkx
+python-dotenv
