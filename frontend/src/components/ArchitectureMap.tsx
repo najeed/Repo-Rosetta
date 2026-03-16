@@ -17,7 +17,7 @@ import {
   Panel,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
-import { GitCompare, Users } from 'lucide-react';
+import { GitCompare } from 'lucide-react';
 
 const initialNodes: Node[] = [
   {

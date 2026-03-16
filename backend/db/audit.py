@@ -1,3 +1,4 @@
+import os
 from datetime import datetime
 from typing import Optional
 
@@ -15,4 +16,3 @@ class AuditLogger:
         with open(log_file, "a") as f:
             f.write(log_entry)
         print(f"[*] Audit logged: {action} on {repo_id} by {user_id}")
-import os

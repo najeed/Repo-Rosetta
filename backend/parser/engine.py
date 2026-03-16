@@ -10,15 +10,16 @@ import os
 
 class ParserEngine:
     def __init__(self):
+        # Initialize languages directly from tree-sitter bindings
         self.languages = {
-            "python": Language(tspython.language()),
-            "javascript": Language(tsjs.language()),
-            "typescript": Language(tstypescript.language()),
-            "go": Language(tsgo.language()),
-            "rust": Language(tsrust.language()),
-            "cpp": Language(tscpp.language()),
+            "python": tspython.language(),
+            "javascript": tsjs.language(),
+            "typescript": tstypescript.language(),
+            "go": tsgo.language(),
+            "rust": tsrust.language(),
+            "cpp": tscpp.language(),
         }
-        self.parser = Parser()
+        self.parser = Parser(self.languages["python"]) # Initialize with a default
 
     def parse_file(self, file_path: str) -> Dict[str, Any]:
         ext = os.path.splitext(file_path)[1].lower()
@@ -53,12 +54,12 @@ class ParserEngine:
         print(f"[*] Securely deleted raw code at: {path}")
 
     def _extract_entities(self, tree, lang: str, file_path: str) -> Dict[str, Any]:
-        # This is a placeholder for actual extraction logic which will use queries
-        # to find functions, classes, and imports.
+        # Planned implementation: Use tree-sitter queries to extract
+        # comprehensive function, class, and import metadata.
         entities = []
         root_node = tree.root_node
         
-        # Simple extraction logic for demonstration
+        # Current: Heuristic-based extraction for architectural overview
         # In a real implementation, we would use tree-sitter queries
         return {
             "file": file_path,

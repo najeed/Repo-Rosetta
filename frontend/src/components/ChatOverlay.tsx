@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
-import { Send, X, MessageSquare, Bot, User } from 'lucide-react';
+import { Send, X, Bot, User } from 'lucide-react';
 import { clsx } from 'clsx';
 
 interface Message {

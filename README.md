@@ -51,4 +51,4 @@ For detailed guides, please refer to:
 Repo Rosetta is open-source software licensed under the **MIT License**.
 
 ---
-*Built with ❤️ for developers who hate reading legacy code.*
+*Built with ❤️ by [Najeed Khan](https://github.com/najeed) for developers who hate reading legacy code.*

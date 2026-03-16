@@ -17,10 +17,8 @@ class AnnotationManager:
             "timestamp": "2026-03-16T12:40:00Z" # Mock timestamp
         })
         
-        # In a real app, this would be a DB. For this demo, we mock it.
-        # os.makedirs(os.path.dirname(ANNOTATIONS_FILE), exist_ok=True)
-        # with open(ANNOTATIONS_FILE, "w") as f:
-        #     json.dump(annotations, f)
+        # Persistence layer: Planned integration with SQLite/PostgreSQL
+        # annotations[node_id].append(...)
 
     @staticmethod
     def get_annotations(node_id: str) -> List[Dict[str, str]]:

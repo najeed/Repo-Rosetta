@@ -1,7 +1,7 @@
 "use client";
 
 import React from 'react';
-import { Settings, ExternalLink, Activity, Info, Code2, Layers, MessageSquare } from 'lucide-react';
+import { ExternalLink, Activity, Info, Code2, Layers, MessageSquare } from 'lucide-react';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 
@@ -141,11 +141,11 @@ export const ExplanationPanel: React.FC<ExplanationPanelProps> = ({
           <div className="space-y-2">
             <div className="p-2.5 rounded-lg bg-slate-800/20 border border-slate-800 flex flex-col gap-1">
               <span className="text-[10px] font-bold text-blue-400 uppercase">Slack #auth-channel</span>
-              <p className="text-xs text-slate-400 italic">"Discussion on moving to OAuth2 logic (March 2026)"</p>
+              <p className="text-xs text-slate-400 italic">&quot;Discussion on moving to OAuth2 logic (March 2026)&quot;</p>
             </div>
             <div className="p-2.5 rounded-lg bg-slate-800/20 border border-slate-800 flex flex-col gap-1">
               <span className="text-[10px] font-bold text-emerald-400 uppercase">Notion wiki</span>
-              <p className="text-xs text-slate-400 italic">"ADR: Secure Data Deletion patterns"</p>
+              <p className="text-xs text-slate-400 italic">&quot;ADR: Secure Data Deletion patterns&quot;</p>
             </div>
           </div>
         </section>

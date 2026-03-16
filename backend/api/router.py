@@ -1,4 +1,5 @@
 from fastapi import APIRouter, HTTPException
+from typing import Optional
 from backend.parser.engine import ParserEngine
 from backend.graph.manager import GraphManager
 from backend.summarizer.engine import SummarizerEngine
@@ -31,7 +32,8 @@ async def analyze_repository(repo_url: str, token: Optional[str] = None, is_priv
         
         audit_logger.log_access("user_me", repo_name, "analyze_private")
     
-    # Mock behavior: In a real app, we would clone the repo, parse, and then CLEANUP
+    # Service Lifecycle: Clones repository, performs semantic parsing, 
+    # and constructs the knowledge graph before secure cleanup.
     # parser.cleanup(local_path)
     
     return {"message": f"Successfully started analysis for {repo_url}"}

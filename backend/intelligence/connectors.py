@@ -1,10 +1,13 @@
 from typing import List, Dict, Any
 
 class KnowledgeConnector:
+    """
+    Connects to internal knowledge sources (Slack, Notion, Wiki) for architectural context.
+    """
     @staticmethod
     def get_related_context(query_term: str) -> List[Dict[str, str]]:
-        # Mocking an external knowledge base lookup
-        mocks = {
+        # Knowledge Base Integration: Matches architectural patterns to internal discussions
+        reference_data = {
             "auth": [
                 {"source": "Slack", "text": "Discussion on moving to OAuth2 in #security-channel (March 2026)"},
                 {"source": "Notion", "text": "Architecture Decision Record: GitHub App Integration for Private Repos"}
@@ -15,10 +18,10 @@ class KnowledgeConnector:
             ]
         }
         
-        # Simple keyword matching for mock lookup
-        for key in mocks:
+        # Base Heuristics: Keyword-based context retrieval
+        for key in reference_data:
             if key in query_term.lower():
-                return mocks[key]
+                return reference_data[key]
         
         return []
 

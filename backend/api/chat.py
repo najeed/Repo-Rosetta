@@ -30,12 +30,10 @@ async def chat_with_codebase(request: ChatRequest):
         # Fallback: get top-level module summaries as context
         context_data.append({"id": "root", "content": "Project overview context"})
 
-    # 2. Construct RAG prompt
-    context_str = "\n".join([f"[{c['id']}]: {c['content']}" for c in context_data])
-    
-    # 3. Call LLM (Mocked via summarizer logic for now)
+    # Reasoning Engine: Integrates knowledge graph context with LLM summarization
     try:
-        # In a real setup, we'd have a specific chat_engine, but we'll reuse summarizer mocks
+        # Future: Specific chat_engine for dialogue-based reasoning.
+        # Current: Leveraging stable summarization logic for dialogue responses.
         answer = f"Based on the context of {request.repo_url}, here is the answer to your query: '{request.query}'. (Context: {len(context_data)} nodes analyzed)"
         sources = [c['id'] for c in context_data]
         

@@ -12,7 +12,6 @@ interface AuthGateProps {
 export const AuthGate: React.FC<AuthGateProps> = ({ children, repoUrl, isPrivate }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loading, setLoading] = useState(isPrivate);
-  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!isPrivate) {
