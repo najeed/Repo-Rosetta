@@ -8,13 +8,12 @@ Repo Rosetta transforms complex repositories into visual, understandable knowled
 
 ## ✨ Key Features
 
-- **Interactive Architecture Maps**: Powered by React Flow with multi-selection, team annotations, and **Regression Mode**.
-- **Multi-Persona AI**: Tailored explanations for Beginner, Senior, Architect, and PM roles.
-- **Interactive Chat**: Context-aware RAG conversation directly with your codebase.
-- **Enterprise Intelligence**: AI Refactoring Advisor and Internal Knowledge base connectors (Slack/Notion).
-- **Ecosystem Support**: LSP-style IDE proxy and **Architectural Regression Maps** for CI/CD visualization.
-- **Privacy-First**: Permission gates and local LLM support (Ollama) for private repositories.
-- **High Performance**: Rust-powered graph engine using `rustworkx` for 10x scalability.
+- **Interactive Architecture Maps**: Real-time visualization powered by React Flow with persistent team annotations.
+- **Multi-Persona AI**: Tailored explanations for Beginner, Senior, Architect, and PM roles using multi-file context.
+- **Context-Aware Intelligence**: RAG-driven insights using live repository data and local markdown documentation search.
+- **Hardened Semantic Engine**: Production-grade Tree-sitter implementation for Python, JS, TS, TSX, Go, Rust, and C++.
+- **LSP Evolution**: Integrated symbol lookup and hover metadata driven by the interactive knowledge graph.
+- **Privacy-First**: Enterprise-grade permission gates and local LLM support for secure analysis.
 
 ---
 

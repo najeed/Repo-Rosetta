@@ -7,6 +7,13 @@ from backend.models import RepositoryContext
 
 from backend.auth.github import GitHubAuth
 from backend.db.audit import AuditLogger
+from backend.db.annotations import AnnotationManager
+from pydantic import BaseModel
+
+class AnnotationRequest(BaseModel):
+    node_id: str
+    author: str
+    text: str
 
 router = APIRouter()
 parser = ParserEngine()
@@ -14,6 +21,16 @@ graph_manager = GraphManager()
 summarizer = SummarizerEngine()
 auth_manager = GitHubAuth()
 audit_logger = AuditLogger()
+annotation_manager = AnnotationManager()
+
+@router.post("/annotation")
+async def save_annotation(request: AnnotationRequest):
+    annotation_manager.save_annotation(request.node_id, request.author, request.text)
+    return {"message": "Annotation saved successfully"}
+
+@router.get("/annotations/{node_id}")
+async def get_annotations(node_id: str):
+    return annotation_manager.get_annotations(node_id)
 
 @router.get("/health")
 async def health_check():
@@ -33,8 +50,6 @@ async def analyze_repository(repo_url: str, token: Optional[str] = None, is_priv
         audit_logger.log_access("user_me", repo_name, "analyze_private")
     
     # Real Orchestration Logic
-    # In a production system, we would clone the repo to a temp directory
-    # For this verification phase, we scan the current workspace to demonstrate capabilities
     import os
     from backend.models import CodeEntity
     
@@ -42,37 +57,40 @@ async def analyze_repository(repo_url: str, token: Optional[str] = None, is_priv
     SUPPORTED_EXTS = {".py", ".js", ".ts", ".tsx", ".go", ".rs", ".cpp", ".h"}
     
     scan_results = []
+    # Normalize ignored paths for current OS
+    IGNORED_DIRS = {".git", "node_modules", "venv", "__pycache__", ".next", ".gemini", "brain", ".agents", "dist", "build"}
+    
     for root, dirs, files in os.walk(local_path):
-        if any(ignored in root for ignored in [".git", "node_modules", "venv", "__pycache__", ".next"]):
+        # Skip ignored directories effectively by checking all path components
+        path_parts = set(os.path.normpath(root).split(os.sep))
+        if any(ignored in path_parts for ignored in IGNORED_DIRS):
             continue
             
-        for file in files:
-            ext = os.path.splitext(file)[1].lower()
-            if ext in SUPPORTED_EXTS:
-                file_path = os.path.join(root, file)
-                # Normalize path for the graph
-                rel_path = os.path.relpath(file_path, local_path).replace("\\", "/")
+        valid_files = [f for f in files if os.path.splitext(f)[1].lower() in SUPPORTED_EXTS]
+        for file in valid_files:
+            file_path = os.path.join(root, file)
+            rel_path = os.path.relpath(file_path, local_path).replace("\\", "/")
+            scan_results.append(rel_path)
+            
+            result = parser.parse_file(file_path)
+            if result and result.get("entities") is not None:
+                # Add module node first with real line count
+                graph_manager.add_entity(CodeEntity(
+                    name="module",
+                    type="module",
+                    path=rel_path,
+                    line_start=1,
+                    line_end=result.get("line_count", 1)
+                ))
                 
-                # Parse
-                result = parser.parse_file(file_path)
-                if result and result.get("entities"):
-                    # Add module node first
+                for ent in result["entities"]:
                     graph_manager.add_entity(CodeEntity(
-                        name="module",
-                        type="module",
+                        name=ent["name"],
+                        type=ent["type"],
                         path=rel_path,
-                        line_start=1,
-                        line_end=1000 # Approximation
+                        line_start=ent["line_start"],
+                        line_end=ent["line_end"]
                     ))
-                    
-                    for ent in result["entities"]:
-                        graph_manager.add_entity(CodeEntity(
-                            name=ent["name"],
-                            type=ent["type"],
-                            path=rel_path,
-                            line_start=ent["line_start"],
-                            line_end=ent["line_end"]
-                        ))
     
     # Build semantic connections across the finished graph
     graph_manager.build_semantic_connections()

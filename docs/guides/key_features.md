@@ -31,9 +31,11 @@ Click the floating **Message Square** icon in the bottom-right to open the Roset
 - Ask codebase-specific questions (e.g., "Where is the auth logic?").
 - The AI uses the Knowledge Graph to provide accurate citations and context.
 
-## ✍️ Team Annotations
+## ✍️ Team Annotations (Persistent)
 Collaborate with your team directly on the diagram:
-- **Right-Click** any node to add a persistent "Team Note".
+- **Right-Click** any node to open the context menu.
+- Select **"Save Annotation"** to add a persistent note.
+- These annotations are stored in the backend SQL database and will be visible to all team members exploring the module.
 - Perfect for documenting architectural guardrails or legacy warnings.
 
 ## 📉 Regression Mode

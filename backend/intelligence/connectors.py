@@ -6,24 +6,35 @@ class KnowledgeConnector:
     """
     @staticmethod
     def get_related_context(query_term: str) -> List[Dict[str, str]]:
-        # Knowledge Base Integration: Matches architectural patterns to internal discussions
-        reference_data = {
-            "auth": [
-                {"source": "Slack", "text": "Discussion on moving to OAuth2 in #security-channel (March 2026)"},
-                {"source": "Notion", "text": "Architecture Decision Record: GitHub App Integration for Private Repos"}
-            ],
-            "graph": [
-                {"source": "Slack", "text": "@dev-team: Reminder to optimize NetworkX to rustworkx for large repos"},
-                {"source": "Internal Wiki", "text": "Graph Schema Version 2.1 Documentation"}
-            ]
-        }
+        # Real-time Local Documentation Search
+        # Scans the current repository for architectural context in markdown files
+        context = []
+        import os
         
-        # Base Heuristics: Keyword-based context retrieval
-        for key in reference_data:
-            if key in query_term.lower():
-                return reference_data[key]
-        
-        return []
+        try:
+            for root, _, files in os.walk("."):
+                if any(ignored in root for ignored in [".git", "node_modules", "venv"]):
+                    continue
+                
+                for file in files:
+                    if file.lower().endswith(".md"):
+                        path = os.path.join(root, file)
+                        with open(path, "r", encoding="utf-8", errors="ignore") as f:
+                            content = f.read()
+                            if query_term.lower() in content.lower():
+                                # Extract a snippet
+                                start_idx = content.lower().find(query_term.lower())
+                                snippet = content[max(0, start_idx-50):min(len(content), start_idx+150)]
+                                context.append({
+                                    "source": os.path.relpath(path, ".").replace("\\", "/"),
+                                    "text": f"...{snippet.strip()}..."
+                                })
+                                if len(context) >= 5: # Limit results
+                                    return context
+            return context
+        except Exception as e:
+            print(f"[*] KnowledgeConnector error: {e}")
+            return []
 
 class RefactoringAdvisor:
     @staticmethod

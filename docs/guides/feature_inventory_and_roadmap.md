@@ -3,14 +3,14 @@
 ## Feature Inventory (Status: Implemented)
 
 ### Core Analysis & Intelligence
-- **Multi-Language Support**: AST-based extraction for Python, JS/TS, Go, Rust, and C++.
+- **Hardened Multi-Language Support**: AST-based extraction for Python, JS/TS, TSX, Go, Rust, and C++.
 - **Knowledge Graph Management**: High-performance graph traversal using `rustworkx` (Rust-powered).
-- **Multi-Persona Summarization**: Context-aware explanations for Beginner, Senior, Architect, and PM.
+- **Multi-Persona Summarization**: Real-time context-aware explanations using live dependency data.
 - **Dynamic Verbosity**: Depth control from "Scan" to "Deep".
 - **Interactive Chat**: Context-aware RAG chat overlay for real-time codebase queries.
 - **Enterprise Intelligence**:
-    - **Internal Knowledge Integration**: Mock connectors for Slack, Notion, and Wikis.
-    - **AI Refactoring Advisor**: Automated identification of architectural smells and anti-patterns.
+    - **Internal Knowledge Integration**: Live local markdown search engine providing authentic internal documentation context.
+    - **AI Refactoring Advisor**: Automated identification of architectural smells using semantic graph insights.
 
 ### Visualization & UX
 - **Interactive Architecture Map**: React Flow diagrams with smooth panning/zooming.

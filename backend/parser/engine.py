@@ -4,36 +4,32 @@ import tree_sitter_typescript as tstypescript
 import tree_sitter_go as tsgo
 import tree_sitter_rust as tsrust
 import tree_sitter_cpp as tscpp
-from tree_sitter import Language, Parser
+from tree_sitter import Language, Parser, Query, QueryCursor
 from typing import List, Dict, Any
 import os
-
 class ParserEngine:
+    MAX_FILE_SIZE = 1024 * 1024 * 2 # 2MB limit for semantic analysis
+
     def __init__(self):
-        # Initialize languages from tree-sitter bindings with fallbacks for naming variations
-        self.languages = {
-            "python": self._get_lang(tspython, "python"),
-            "javascript": self._get_lang(tsjs, "javascript"),
-            "typescript": self._get_lang(tstypescript, "typescript"),
-            "tsx": self._get_lang(tstypescript, "tsx"),
-            "go": self._get_lang(tsgo, "go"),
-            "rust": self._get_lang(tsrust, "rust"),
-            "cpp": self._get_lang(tscpp, "cpp"),
-        }
-        self.parser = Parser(self.languages["python"])
+        # Initialize languages from tree_sitter 0.25+ bindings
+        self.languages = {}
+        for lang_name, module in [
+            ("python", tspython), ("javascript", tsjs), ("typescript", tstypescript),
+            ("tsx", tstypescript), ("go", tsgo), ("rust", tsrust), ("cpp", tscpp)
+        ]:
+            try:
+                self.languages[lang_name] = self._get_lang(module, lang_name)
+            except Exception as e:
+                print(f"[*] Warning: Could not initialize {lang_name}: {e}")
 
     def _get_lang(self, module, name):
-        # Handle variations where some libs use module.language() and others module.language_name()
-        capsule = None
+        # Standard tree-sitter 0.25 language getter
         if hasattr(module, "language"):
-            capsule = module.language()
-        elif hasattr(module, f"language_{name}"):
-            capsule = getattr(module, f"language_{name}")()
-        
-        if capsule:
-            from tree_sitter import Language
-            return Language(capsule)
-        raise AttributeError(f"Could not find language getter in tree-sitter-{name}")
+            return Language(module.language())
+        # Fallback for older or variant bindings
+        if hasattr(module, f"language_{name}"):
+            return Language(getattr(module, f"language_{name}")())
+        raise AttributeError(f"Binding for {name} does not export a language() getter.")
 
     def parse_file(self, file_path: str) -> Dict[str, Any]:
         ext = os.path.splitext(file_path)[1].lower()
@@ -58,6 +54,9 @@ class ParserEngine:
             if not os.path.exists(file_path):
                 return None
             
+            if os.path.getsize(file_path) > self.MAX_FILE_SIZE:
+                return {"file": file_path, "language": lang, "entities": [], "error": "File too large"}
+            
             try:
                 with open(file_path, "rb") as f:
                     code_bytes = f.read()
@@ -71,7 +70,9 @@ class ParserEngine:
                     # Fallback or diagnostic for failed parse
                     return {"file": file_path, "language": lang, "entities": [], "error": "Syntax Error or Version Mismatch"}
                 
-                return self._extract_entities(tree, lang, file_path)
+                result = self._extract_entities(tree, lang, file_path)
+                result["line_count"] = tree.root_node.end_point[0] + 1
+                return result
             except Exception as e:
                 # Log but don't crash
                 print(f"[*] Parser failure for {file_path}: {e}")
@@ -91,20 +92,61 @@ class ParserEngine:
         if lang not in self.languages:
             return {"file": file_path, "language": lang, "entities": []}
 
-        # Python SCM Queries
-        if lang == "python":
-            query_scm = """
-            (class_definition
-                name: (identifier) @class.name) @class.def
-            (function_definition
-                name: (identifier) @function.name) @function.def
-            (import_from_statement
-                module_name: (dotted_name) @import.from) @import.stmt
-            (import_statement
-                name: (dotted_name) @import.name) @import.stmt
+        # Multi-Language SCM Queries
+        queries = {
+            "python": """
+                (class_definition name: (identifier) @class.name)
+                (function_definition name: (identifier) @function.name)
+                (import_from_statement module_name: (dotted_name) @import.name)
+                (import_statement name: (dotted_name) @import.name)
+            """,
+            "javascript": """
+                (class_declaration name: (identifier) @class.name)
+                (function_declaration name: (identifier) @function.name)
+                (method_definition name: (property_identifier) @function.name)
+                (import_statement source: (string) @import.name)
+                (variable_declarator name: (identifier) @function.name value: (arrow_function))
+                (variable_declarator name: (identifier) @function.name value: (function_expression))
+            """,
+            "typescript": """
+                (class_declaration name: (type_identifier) @class.name)
+                (function_declaration name: (identifier) @function.name)
+                (method_definition name: (property_identifier) @function.name)
+                (import_statement source: (string) @import.name)
+                (interface_declaration name: (type_identifier) @class.name)
+                (variable_declarator name: (identifier) @function.name value: (arrow_function))
+            """,
+            "tsx": """
+                (class_declaration name: (type_identifier) @class.name)
+                (function_declaration name: (identifier) @function.name)
+                (method_definition name: (property_identifier) @function.name)
+                (import_statement source: (string) @import.name)
+                (interface_declaration name: (type_identifier) @class.name)
+                (variable_declarator name: (identifier) @function.name value: (arrow_function))
+            """,
+            "go": """
+                (type_spec name: (type_identifier) @class.name)
+                (func_declaration name: (identifier) @function.name)
+                (method_declaration name: (field_identifier) @function.name)
+                (import_spec path: (string_literal) @import.name)
+            """,
+            "rust": """
+                (struct_item name: (type_identifier) @class.name)
+                (enum_item name: (type_identifier) @class.name)
+                (function_item name: (identifier) @function.name)
+                (use_declaration argument: (_) @import.name)
+                (impl_item type: (type_identifier) @class.name)
+                (trait_item name: (type_identifier) @class.name)
+            """,
+            "cpp": """
+                (class_specifier name: (type_identifier) @class.name)
+                (function_definition declarator: (function_declarator declarator: (identifier) @function.name))
+                (preproc_include path: (string_literal) @import.name)
             """
-        else:
-            # Placeholder for other languages, for now return empty
+        }
+
+        query_scm = queries.get(lang)
+        if not query_scm:
             return {"file": file_path, "language": lang, "entities": []}
         
         try:
@@ -119,22 +161,18 @@ class ParserEngine:
         # In tree-sitter 0.25, captures is a dict: { "tag.name": [Node, ...] }
         for tag, nodes in captures.items():
             for node in nodes:
-                if tag in ["class.name", "function.name"]:
-                    entities.append({
-                        "name": node.text.decode("utf-8"),
-                        "type": "class" if "class" in tag else "function",
-                        "path": file_path,
-                        "line_start": node.start_point[0] + 1,
-                        "line_end": node.end_point[0] + 1,
-                    })
-                elif tag in ["import.from", "import.name"]:
-                    entities.append({
-                        "name": node.text.decode("utf-8"),
-                        "type": "import",
-                        "path": file_path,
-                        "line_start": node.start_point[0] + 1,
-                        "line_end": node.end_point[0] + 1,
-                    })
+                node_type = "unknown"
+                if "class" in tag: node_type = "class"
+                elif "function" in tag: node_type = "function"
+                elif "import" in tag: node_type = "import"
+
+                entities.append({
+                    "name": node.text.decode("utf-8") if isinstance(node.text, bytes) else node.text,
+                    "type": node_type,
+                    "path": file_path,
+                    "line_start": node.start_point[0] + 1,
+                    "line_end": node.end_point[0] + 1,
+                })
 
         return {
             "file": file_path,

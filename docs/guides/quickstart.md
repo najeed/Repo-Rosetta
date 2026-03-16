@@ -38,4 +38,4 @@ python cli/rosetta.py ./my-project --output ./docs/rosetta
 ## 5. Next Steps
 - Learn how to use [Personas and Verbosity](./key_features.md).
 - Configure [Private Repository Access](./detailed_guides.md).
-- Supported Languages: **Python, JavaScript, TypeScript, Go, Rust, and C++**.
+- Supported Languages: **Python, JavaScript, TypeScript, TSX, Go, Rust, and C++**.

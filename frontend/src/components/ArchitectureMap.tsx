@@ -61,9 +61,57 @@ const initialEdges: Edge[] = [
 ];
 
 export const ArchitectureMap = () => {
-  const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
-  const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
+  const [nodes, setNodes, onNodesChange] = useNodesState<Node>([]);
+  const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>([]);
   const [isRegressionMode, setIsRegressionMode] = React.useState(false);
+
+  React.useEffect(() => {
+    const fetchGraph = async () => {
+      try {
+        const response = await fetch('/api/graph');
+        const data = await response.json();
+        
+        const flowNodes: Node[] = data.nodes.map((n: any, idx: number) => ({
+          id: n.id,
+          data: { label: `${n.name} [${n.type}]` },
+          position: { x: (idx % 3) * 250, y: Math.floor(idx / 3) * 150 },
+          className: n.type === 'module' 
+            ? 'bg-slate-900 border-2 border-blue-500 text-white rounded-lg p-4 shadow-lg'
+            : n.type === 'class'
+            ? 'bg-slate-800 border border-violet-500 text-white rounded-lg p-3'
+            : 'bg-slate-800 border border-slate-700 text-slate-300 rounded-lg p-2 text-sm'
+        }));
+
+        const flowEdges: Edge[] = data.edges.map((e: any) => ({
+          id: `e-${e.source}-${e.target}`,
+          source: e.source,
+          target: e.target,
+          label: e.type,
+          animated: e.type === 'depends_on',
+          style: { stroke: e.type === 'depends_on' ? '#8B5CF6' : '#64748B' }
+        }));
+
+        setNodes(flowNodes);
+        setEdges(flowEdges);
+      } catch (err) {
+        console.error("Failed to fetch graph:", err);
+      }
+    };
+    fetchGraph();
+  }, []);
+
+  const saveAnnotation = async (nodeId: string, text: string) => {
+    try {
+      await fetch('/api/annotation', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ node_id: nodeId, author: 'User', text })
+      });
+      alert(`Annotation saved for ${nodeId}`);
+    } catch (err) {
+      console.error("Failed to save annotation:", err);
+    }
+  };
 
   const onConnect = useCallback(
     (params: Edge | Connection) => setEdges((eds) => addEdge(params, eds)),
@@ -82,7 +130,7 @@ export const ArchitectureMap = () => {
           event.preventDefault();
           const note = prompt(`Add Team Note for ${node.data.label}:`);
           if (note) {
-            alert(`Annotation saved for ${node.id}: "${note}"\n(Successfully stored in V5 Enterprise Knowledge Map)`);
+            saveAnnotation(node.id, note);
           }
         }}
         onSelectionChange={({ nodes }) => {

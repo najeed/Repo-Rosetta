@@ -89,22 +89,31 @@ Repo Rosetta integrates natively with **Ollama**.
 
 ---
 
+## ⚒️ Interactive Features
+
+### Persistent Annotations
+You can now collaborate on architecture designs by adding persistent notes to any node:
+1. **Right-click** on any node in the Architecture Map.
+2. Select **"Save Annotation"**.
+3. Your notes are durably stored in the local database and will persist across sessions.
+
+### Dynamic Context Search
+When requesting summaries, the system now performs a **Local Markdown Search**:
+- It scans `.md` files in your repository for keywords related to the selected entity.
+- This provides an authentic "Internal Wiki" context to the AI, allowing for project-specific business logic explanations.
+
+---
+
 ## 🏛 Ecosystem & Performance
 
-### Multi-Language Support
-Rosetta provides full AST-level mapping for:
-- **Web**: JavaScript, TypeScript.
+### Hardened Multi-Language Support
+Rosetta provides production-grade AST-level mapping for:
+- **Web**: JavaScript, TypeScript, TSX (React).
 - **Systems**: Go, Rust, C++.
 - **Scripting**: Python.
 
 ### High Performance Core
-The graph engine is powered by **rustworkx**, a Rust-based library providing 10x-50x speedups for large dependency graphs compared to standard Python implementations.
-
-### IDE Integration (LSP Proxy)
-Rosetta provides an **LSP Proxy** endpoint at `/api/lsp`. This allows external editors (VS Code, JetBrains) to pull architectural insights (hover explanations, dependency paths) directly into your coding environment.
-
-### Architectural Regression (CI/CD)
-Track the "Drift" of your codebase. Rosetta can compare current graphs against baselines to highlight structural changes, ensuring that your architecture aligns with its documentation over time.
+The graph engine is powered by **rustworkx**, providing 10x scalability. The semantic parser is optimized for low-latency analysis of large files (up to 2MB).
 
 ---
 

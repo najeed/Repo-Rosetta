@@ -8,7 +8,7 @@ When you analyze a private repository, Repo Rosetta follows a strict security pr
 1. **Authorization**: The user logs in via GitHub OAuth. The system verifies if the user has **Maintainer** permissions on the target repository.
 2. **Ephemeral Ingestion**:
     - The backend clones the repository into a temporary, isolated directory.
-    - The **Parser Engine** runs AST extraction to build the Knowledge Graph.
+    - The **Parser Engine** runs professional-grade AST extraction (supporting Python, JS, TS, TSX, Go, Rust, C++) to build the Knowledge Graph.
 3. **Immediate Cleanup**: Once the Knowledge Graph is created, the raw source code is **permanently deleted** from the server's disk. Only the abstracted graph remains.
 4. **Audit Logging**: Every analysis and view event is recorded in a tamper-proof audit log (found in `logs/audit`).
 
