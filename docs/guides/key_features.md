@@ -36,7 +36,7 @@ Collaborate with your team directly on the diagram:
 - **Right-Click** any node to add a persistent "Team Note".
 - Perfect for documenting architectural guardrails or legacy warnings.
 
-## 📉 Regression Mode (P6)
+## 📉 Regression Mode
 Visualize how the codebase has changed over time:
 - Toggle **Regression Mode** to see color-coded changes.
 - **Green**: Newly added modules/entities.
